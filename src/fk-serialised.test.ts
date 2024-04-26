@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, MikroORM, PrimaryKey, PrimaryKeyProp, Property, wrap } from '@mikro-orm/sqlite';
+import { Collection, Entity, ManyToOne, MikroORM, OneToMany, PrimaryKey, PrimaryKeyProp, Property, wrap } from '@mikro-orm/sqlite';
 
 @Entity()
 class User {
@@ -11,6 +11,12 @@ class User {
 
   @Property({ unique: true })
   email: string;
+
+  @OneToMany({ entity: () => Debt, mappedBy: 'lender', orphanRemoval: true })
+  jncLenders = new Collection<Debt>(this);
+
+  @OneToMany({ entity: () => Debt, mappedBy: 'debtor', orphanRemoval: true })
+  jncDebtors = new Collection<Debt>(this);
 
   constructor(name: string, email: string) {
     this.name = name;
