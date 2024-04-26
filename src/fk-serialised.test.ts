@@ -1,4 +1,4 @@
-import { Collection, Entity, ManyToOne, MikroORM, OneToMany, PrimaryKey, PrimaryKeyProp, Property, wrap, Ref, ref } from '@mikro-orm/sqlite';
+import { Collection, Entity, ManyToOne, MikroORM, OneToMany, PrimaryKey, PrimaryKeyProp, Property, wrap, ref, Reference, Ref } from '@mikro-orm/sqlite';
 
 @Entity()
 class User {
@@ -30,10 +30,10 @@ class Debt {
 
   [PrimaryKeyProp]?: ['lender', 'debtor'];
 
-  @ManyToOne({ primary: true, updateRule: 'cascade', deleteRule: 'cascade' })
+  @ManyToOne({ primary: true, updateRule: 'cascade', deleteRule: 'cascade', ref: true })
   lender!: Ref<User>;
 
-  @ManyToOne({ primary: true, updateRule: 'cascade', deleteRule: 'cascade' })
+  @ManyToOne({ primary: true, updateRule: 'cascade', deleteRule: 'cascade', ref: true })
   debtor!: Ref<User>;
 
   @Property()
@@ -51,7 +51,7 @@ let orm: MikroORM;
 beforeAll(async () => {
   orm = await MikroORM.init({
     dbName: ':memory:',
-    entities: [User, Debt],
+    entities: [User, Reference<User>, Debt],
     debug: ['query', 'query-params'],
     allowGlobalContext: true, // only for testing
   });
@@ -84,18 +84,22 @@ test('FK when serialized', async () => {
 
   // [START] first check that populated works
   const lenderPopulated = await orm.em.findOneOrFail(Debt, { lender: debt.lender }, { populate: ['lender'] });
-  expect(lenderPopulated.lender.id).toBeDefined();
+  expect(lenderPopulated.lender).toBeDefined();
+  // expect((lenderPopulated.lender as any).id).toBeUndefined();
+  expect(typeof lenderPopulated.lender.$.id).toBe(typeof 0);
+  expect(typeof lenderPopulated.lender.unwrap().id).toBe(typeof 0);
 
   const sLenderPopulated = wrap(lenderPopulated).toObject();
   expect(sLenderPopulated.lender).toBeDefined();
-  expect(sLenderPopulated.lender.id).toBeDefined();
+  expect(typeof sLenderPopulated.lender.id).toBe(typeof 0);
 
   // [START] unpopulated seems to be populated
   const lenderUnpopulated = await orm.em.findOneOrFail(Debt, { lender: debt.lender }, { populate: false });
-  expect(lenderUnpopulated.lender).toBeDefined(); // should be FK
-  expect(lenderUnpopulated.lender.id).toBeUndefined(); // should not exist ??
+  expect(typeof lenderUnpopulated.lender).toBe(typeof 0);
+  expect((lenderUnpopulated.lender as any).id).toBeUndefined();
+  expect(typeof lenderUnpopulated.lender.unwrap().id).toBe(typeof 0);
 
   const sLenderUnpopulated = wrap(lenderUnpopulated).toObject();
-  expect(sLenderUnpopulated.lender).toBeDefined(); // should be FK
-  expect((sLenderUnpopulated.lender as any).id).toBeUndefined(); // should not exist ??
+  expect(typeof sLenderUnpopulated.lender).toBe(typeof 0);
+  // expect((sLenderUnpopulated.lender as any).id).toBeUndefined();
 });
