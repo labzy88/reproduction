@@ -85,7 +85,7 @@ test('FK when serialized', async () => {
   // [START] first check that populated works
   const lenderPopulated = await orm.em.findOneOrFail(Debt, { lender: debt.lender }, { populate: ['lender'] });
   expect(lenderPopulated.lender).toBeDefined();
-  // expect((lenderPopulated.lender as any).id).toBeUndefined();
+  expect((lenderPopulated.lender as any).id).toBeUndefined();
   expect(typeof lenderPopulated.lender.$.id).toBe(typeof 0);
   expect(typeof lenderPopulated.lender.unwrap().id).toBe(typeof 0);
 
@@ -101,5 +101,5 @@ test('FK when serialized', async () => {
 
   const sLenderUnpopulated = wrap(lenderUnpopulated).toObject();
   expect(typeof sLenderUnpopulated.lender).toBe(typeof 0);
-  // expect((sLenderUnpopulated.lender as any).id).toBeUndefined();
+  expect((sLenderUnpopulated.lender as any).id).toBeUndefined();
 });
