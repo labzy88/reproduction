@@ -94,5 +94,5 @@ test('FK when serialized', async () => {
 
   const sLenderUnpopulated = wrap(lenderUnpopulated).toObject();
   expect(sLenderUnpopulated.lender).toBeDefined(); // should be FK
-  expect(sLenderUnpopulated.lender.id).toBeUndefined(); // should no exist ??
+  expect(sLenderUnpopulated.lender.id).toBeUndefined(); // should not exist ??
 });
