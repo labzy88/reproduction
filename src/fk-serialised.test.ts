@@ -1,4 +1,4 @@
-import { Collection, Entity, ManyToOne, MikroORM, OneToMany, PrimaryKey, PrimaryKeyProp, Property, wrap } from '@mikro-orm/sqlite';
+import { Collection, Entity, ManyToOne, MikroORM, OneToMany, PrimaryKey, PrimaryKeyProp, Property, wrap, Ref, ref } from '@mikro-orm/sqlite';
 
 @Entity()
 class User {
@@ -31,13 +31,18 @@ class Debt {
   [PrimaryKeyProp]?: ['lender', 'debtor'];
 
   @ManyToOne({ primary: true, updateRule: 'cascade', deleteRule: 'cascade' })
-  lender!: User;
+  lender!: Ref<User>;
 
   @ManyToOne({ primary: true, updateRule: 'cascade', deleteRule: 'cascade' })
-  debtor!: User;
+  debtor!: Ref<User>;
 
   @Property()
   amount: number = 0;
+
+  constructor(lender: User, debtor: User) {
+    this.lender = ref(lender)
+    this.debtor = ref(debtor)
+  }
 
 }
 
@@ -73,9 +78,7 @@ test('basic CRUD example', async () => {
 });
 
 test('FK when serialized', async () => {
-  const debt = new Debt();
-  debt.lender = new User('Foo', 'foo');
-  debt.debtor = new User('Bar', 'bar');
+  const debt = new Debt(new User('Foo', 'foo'), new User('Bar', 'bar'));
 
   await orm.em.persistAndFlush(debt);
 
@@ -94,5 +97,5 @@ test('FK when serialized', async () => {
 
   const sLenderUnpopulated = wrap(lenderUnpopulated).toObject();
   expect(sLenderUnpopulated.lender).toBeDefined(); // should be FK
-  expect(sLenderUnpopulated.lender.id).toBeUndefined(); // should not exist ??
+  expect((sLenderUnpopulated.lender as any).id).toBeUndefined(); // should not exist ??
 });
