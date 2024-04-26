@@ -73,6 +73,7 @@ test('FK when serialized', async () => {
 
   await orm.em.persistAndFlush(debt);
 
+  // [START] first check that populated works
   const lenderPopulated = await orm.em.findOneOrFail(Debt, { lender: debt.lender }, { populate: ['lender'] });
   expect(lenderPopulated.lender.id).toBeDefined();
 
@@ -80,7 +81,8 @@ test('FK when serialized', async () => {
   expect(sLenderPopulated.lender).toBeDefined();
   expect(sLenderPopulated.lender.id).toBeDefined();
 
-  const lenderUnpopulated = await orm.em.findOneOrFail(Debt, { lender: debt.lender }, { populate: [] });
+  // [START] unpopulated seems to be populated
+  const lenderUnpopulated = await orm.em.findOneOrFail(Debt, { lender: debt.lender }, { populate: false });
   expect(lenderUnpopulated.lender).toBeDefined(); // should be FK
   expect(lenderUnpopulated.lender.id).toBeUndefined(); // should not exist ??
 
