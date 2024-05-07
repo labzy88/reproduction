@@ -107,6 +107,7 @@ test("Sum Foo sales raw", async () => {
     .raw(
       "select `u`.`id` as `id`, sum(t.amount) as `total` from `user` as `u` left join `transaction` as `t` on `u`.`id` = `t`.`seller_id` where `u`.`email` = 'foo'"
     );
+    
   expect(resultsRaw).toEqual([{ id: 1, total: 200 }]);
 });
 
@@ -127,10 +128,10 @@ test("Sum Foo sales knex", async () => {
 
 test('Sum Foo sales using qb', async () => {
   const results = await orm.em.createQueryBuilder(User, 'u')
-  .select(['u.id as id', 'sum(t.amount) as total'])
-  .leftJoin('u.jncSales', 't')
-  .where({ email: 'foo' })
-  .getResultList();
+    .select(['u.id as id', 'sum(t.amount) as total'])
+    .leftJoin('u.jncSales', 't')
+    .where({ email: 'foo' })
+    .getResultList();
 
   expect(results).toEqual([{ id: 1, total: 200 }]);
 });
