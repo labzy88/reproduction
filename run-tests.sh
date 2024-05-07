@@ -1,1 +1,1 @@
-rm -rf ./dist && npm run build && npm run test
+rm -rf ./dist && clear && npm run test 
