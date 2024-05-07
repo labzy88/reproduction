@@ -130,7 +130,7 @@ test('Sum Foo sales using qb', async () => {
   .select(['u.id as id', 'sum(t.amount) as total'])
   .leftJoin('u.jncSales', 't')
   .where({ email: 'foo' })
-  .getResult();
+  .getResultList();
 
   expect(results).toEqual([{ id: 1, total: 200 }]);
 });
