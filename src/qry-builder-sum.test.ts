@@ -110,6 +110,21 @@ test("Sum Foo sales raw", async () => {
   expect(resultsRaw).toEqual([{ id: 1, total: 200 }]);
 });
 
+test("Sum Foo sales knex", async () => {
+  const found = await orm.em.findOneOrFail(User, { email: "foo" });
+  expect(found.jncSales[0].amount).toEqual(200);
+
+  const resultsRaw = await orm.em
+    .getKnex()
+    .select("u.id as id")
+    .from("user as u")
+    .leftJoin("transaction as t", "u.id", "t.seller_id")
+    .where({ email: "foo" })
+    .sum("t.amount as total");
+
+  expect(resultsRaw).toEqual([{ id: 1, total: 200 }]);
+});
+
 test('Sum Foo sales using qb', async () => {
   const results = await orm.em.createQueryBuilder(User, 'u')
   .select(['u.id as id', 'sum(t.amount) as total'])
